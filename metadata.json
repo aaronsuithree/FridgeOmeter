@@ -1,0 +1,9 @@
+{
+  "name": "Fridgeometer",
+  "description": "Neural Food Management with Live Multi-Lingual Vision and Voice",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}

@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fridgeometer | Sustainable Kitchen Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              emerald: {
+                50: '#f0fdf4',
+                100: '#dcfce7',
+                200: '#bbf7d0',
+                500: '#10b981',
+                600: '#059669',
+                700: '#047857',
+              },
+              playful: {
+                indigo: '#6366f1',
+                violet: '#8b5cf6',
+                amber: '#f59e0b',
+                rose: '#f43f5e'
+              }
+            },
+            fontFamily: {
+              sans: ['Plus Jakarta Sans', 'sans-serif'],
+              fun: ['Fredoka', 'sans-serif'],
+            },
+            borderRadius: {
+              'blob': '3rem',
+              'mega-blob': '4rem',
+            }
+          }
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --bg-color: #f8fafc;
+        --text-color: #1e293b;
+        --card-bg: rgba(255, 255, 255, 0.95);
+      }
+      .dark {
+        --bg-color: #0f172a;
+        --text-color: #f1f5f9;
+        --card-bg: rgba(30, 41, 59, 0.95);
+      }
+      
+      /* High Contrast Overrides */
+      .high-contrast {
+        --bg-color: #ffffff !important;
+        --text-color: #000000 !important;
+        --card-bg: #ffffff !important;
+      }
+      .high-contrast * {
+        border-color: #000000 !important;
+        box-shadow: none !important;
+        text-decoration-thickness: 2px !important;
+      }
+
+      body { 
+        font-family: 'Plus Jakarta Sans', sans-serif; 
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        overflow-x: hidden;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+
+      .gamified-body {
+        font-family: 'Fredoka', sans-serif;
+      }
+
+      .glass-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+      }
+      
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      @keyframes scanLine {
+        0% { transform: translateY(-100%); opacity: 0; }
+        50% { opacity: 0.5; }
+        100% { transform: translateY(100%); opacity: 0; }
+      }
+      .scan-line {
+        position: absolute;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(to bottom, transparent, #10b981, transparent);
+        animation: scanLine 3s linear infinite;
+        z-index: 10;
+      }
+
+      .fridge-container { perspective: 1200px; }
+      .fridge-door {
+        transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-origin: left;
+        z-index: 20;
+      }
+      .fridge-door.open { transform: rotateY(-110deg); }
+      .fridge-interior {
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+      }
+
+      .bouncy:active { transform: scale(0.92); }
+      .bouncy { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+      /* XP Bar Animation */
+      @keyframes xpGrow {
+        from { width: 0; }
+      }
+      .xp-bar-fill { animation: xpGrow 1s ease-out; }
+    </style>
+  </script>
+<script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://esm.sh/@google/genai@^1.37.0",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
