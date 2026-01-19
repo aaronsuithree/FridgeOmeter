@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type, Chat, GenerateContentResponse, Modality } from "@google/genai";
 import { ScanResult, Category, StorageLocation, FoodItem, SearchResponse, PlaceResult, MealSuggestion, Recipe } from "../types";
 
@@ -43,7 +42,7 @@ export const estimateItemPrice = async (itemName: string): Promise<number> => {
         tools: [{ googleSearch: {} }],
       }
     });
-    const match = response.text.match(/\d+(\.\d+)?/);
+    const match = (response.text || "").match(/\d+(\.\d+)?/);
     return match ? parseFloat(match[0]) : 5.0;
   } catch (error) {
     return 5.0;
@@ -63,7 +62,7 @@ export const estimateItemCalories = async (itemName: string): Promise<number> =>
         tools: [{ googleSearch: {} }],
       }
     });
-    const match = response.text.match(/\d+/);
+    const match = (response.text || "").match(/\d+/);
     return match ? parseInt(match[0]) : 0;
   } catch (error) {
     return 0;

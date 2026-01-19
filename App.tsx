@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, LiveServerMessage, Modality, Chat, GenerateContentResponse } from '@google/genai';
 import { 
@@ -288,7 +287,7 @@ const LoginWelcomeModal: React.FC<{ onDismiss: (neverShowAgain: boolean) => void
         <div className="space-y-4 pt-4">
           <button 
             onClick={() => onDismiss(false)} 
-            className={`w-full py-6 ${isGamified ? 'bg-violet-600' : 'bg-emerald-600'} hover:opacity-90 text-white font-black rounded-[2rem] uppercase tracking-widest italic shadow-2xl active:scale-95 transition-all text-sm`}
+            className={`w-full py-6 ${isGamified ? 'bg-violet-600' : 'bg-emerald-600'} hover:opacity-90 text-white font-black rounded-[2rem] uppercase tracking-widest italic shadow-xl active:scale-95 transition-all text-sm`}
           >
             Continue
           </button>
@@ -499,8 +498,11 @@ const InventoryView: React.FC<{
       // Trigger vocal report immediately
       await GeminiService.speakStatusReport(res, user.isGamified);
     } catch (e: any) {
-      if (e.message?.includes('PERMISSION_DENIED')) onKeyPrompt().then(s => s && handleFileUpload(base64));
-      else onError("Analysis failed.");
+      if (e.message?.includes('PERMISSION_DENIED')) {
+        onKeyPrompt().then(s => { if (s) handleFileUpload(base64); });
+      } else {
+        onError("Analysis failed.");
+      }
     } finally {
       setLoadingScan(false);
     }
@@ -1106,7 +1108,7 @@ const ScannerView: React.FC<{
             scriptNode.connect(micCtxRef.current.destination);
           },
           onmessage: async (msg: LiveServerMessage) => {
-            const audioOut = msg.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
+            const audioOut = msg.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
             if (audioOut && audioCtxRef.current) {
               nextStartTimeRef.current = Math.max(nextStartTimeRef.current, audioCtxRef.current.currentTime);
               const buffer = await decodeAudioData(decode(audioOut), audioCtxRef.current, 24000, 1);
@@ -1117,7 +1119,7 @@ const ScannerView: React.FC<{
               sourcesRef.current.add(srcNode);
               srcNode.onended = () => sourcesRef.current.delete(srcNode);
             }
-            if (msg.serverContent?.outputTranscription) {
+            if (msg.serverContent?.outputTranscription?.text) {
               const text = msg.serverContent.outputTranscription.text.toLowerCase();
               setAnalysisText(text);
               
@@ -1145,8 +1147,11 @@ const ScannerView: React.FC<{
       });
       sessionRef.current = await sessionPromise;
     } catch (e: any) { 
-      if (e.message?.includes('PERMISSION_DENIED')) onKeyPrompt().then(s => s && startScanner());
-      stopScanner(); 
+      if (e.message?.includes('PERMISSION_DENIED')) {
+        onKeyPrompt().then(s => { if (s) startScanner(); });
+      } else {
+        stopScanner();
+      }
     }
   };
 
@@ -1176,8 +1181,11 @@ const ScannerView: React.FC<{
       // Trigger the vocal report
       await GeminiService.speakStatusReport(res, user.isGamified);
     } catch (err: any) {
-      if (err.message?.includes('PERMISSION_DENIED')) onKeyPrompt().then(s => s && captureFullAnalysis());
-      else onError(user.isGamified ? "Magic scan failed!" : "Deep molecular analysis failed.");
+      if (err.message?.includes('PERMISSION_DENIED')) {
+        onKeyPrompt().then(s => { if (s) captureFullAnalysis(); });
+      } else {
+        onError(user.isGamified ? "Magic scan failed!" : "Deep molecular analysis failed.");
+      }
     } finally { setLoading(false); }
   };
 
