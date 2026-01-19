@@ -365,7 +365,7 @@ const DashboardView: React.FC<{ stats: UserStats, user: UserProfile, inventory: 
         </div>
       )}
 
-      {/* NEW: Waste & Composting Analysis Section */}
+      {/* Waste & Composting Analysis Section */}
       <div className={`bg-white dark:bg-slate-800 p-8 ${user.isGamified ? 'rounded-blob' : 'rounded-[3rem]'} shadow-sm border border-slate-100 dark:border-slate-700 space-y-8 animate-in slide-in-from-top-4 duration-700`}>
         <div className="flex justify-between items-center">
            <div className="space-y-1 text-left">
@@ -499,7 +499,11 @@ const InventoryView: React.FC<{
       await GeminiService.speakStatusReport(res, user.isGamified);
     } catch (e: any) {
       if (e.message?.includes('PERMISSION_DENIED')) {
-        onKeyPrompt().then(s => { if (s) handleFileUpload(base64); });
+        onKeyPrompt().then(s => { 
+          if (s) {
+            handleFileUpload(base64); 
+          }
+        });
       } else {
         onError("Analysis failed.");
       }
@@ -1012,7 +1016,7 @@ const AddAssetView: React.FC<{ user: UserProfile, onCancel: () => void, onAdd: (
   );
 };
 
-// --- ScannerView: Updated with dynamic terms ---
+// --- ScannerView ---
 const ScannerView: React.FC<{ 
   user: UserProfile, 
   onAdd: (i: FoodItem) => void, 
@@ -1087,7 +1091,11 @@ const ScannerView: React.FC<{
                   const reader = new FileReader();
                   reader.onloadend = () => {
                     const base64 = (reader.result as string).split(',')[1];
-                    sessionPromise.then(s => { if (sessionRef.current) s.sendRealtimeInput({ media: { data: base64, mimeType: 'image/jpeg' } }); });
+                    sessionPromise.then(s => { 
+                      if (sessionRef.current) {
+                        s.sendRealtimeInput({ media: { data: base64, mimeType: 'image/jpeg' } }); 
+                      }
+                    });
                   };
                   reader.readAsDataURL(blob);
                 }
@@ -1102,7 +1110,11 @@ const ScannerView: React.FC<{
               const int16 = new Int16Array(inputData.length);
               for (let i = 0; i < inputData.length; i++) { int16[i] = inputData[i] * 32768; }
               const base64 = encode(new Uint8Array(int16.buffer));
-              sessionPromise.then(s => { if (sessionRef.current) s.sendRealtimeInput({ media: { data: base64, mimeType: 'audio/pcm;rate=16000' } }); });
+              sessionPromise.then(s => { 
+                if (sessionRef.current) {
+                  s.sendRealtimeInput({ media: { data: base64, mimeType: 'audio/pcm;rate=16000' } }); 
+                }
+              });
             };
             micSource.connect(scriptNode);
             scriptNode.connect(micCtxRef.current.destination);
@@ -1122,14 +1134,11 @@ const ScannerView: React.FC<{
             if (msg.serverContent?.outputTranscription?.text) {
               const text = msg.serverContent.outputTranscription.text.toLowerCase();
               setAnalysisText(text);
-              
-              // NEW: Real-time mould detection flagging
               if (text.includes('mould') || text.includes('mold') || text.includes('spoil') || text.includes('fuzzy')) {
                 setMouldAlert(true);
               } else {
                 setMouldAlert(false);
               }
-
               const match = text.match(/(?:identified|see|is|this|it)\s+([a-zA-Z\s]{3,15})(?:\s+is|\.|\s+in)/i);
               if (match && match[1]) { setObjectName(match[1].trim()); }
             }
@@ -1148,7 +1157,11 @@ const ScannerView: React.FC<{
       sessionRef.current = await sessionPromise;
     } catch (e: any) { 
       if (e.message?.includes('PERMISSION_DENIED')) {
-        onKeyPrompt().then(s => { if (s) startScanner(); });
+        onKeyPrompt().then(s => { 
+          if (s) {
+            startScanner(); 
+          }
+        });
       } else {
         stopScanner();
       }
@@ -1157,14 +1170,11 @@ const ScannerView: React.FC<{
 
   const captureFullAnalysis = async () => {
     if (!videoRef.current || !canvasRef.current) return;
-    
-    // Check for paid API key for deep molecular scan
     const hasKey = await (window as any).aistudio?.hasSelectedApiKey?.();
     if (!hasKey) {
       const selected = await onKeyPrompt();
       if (!selected) return;
     }
-
     setLoading(true); setScanResult(null);
     try {
       const ctx = canvasRef.current.getContext('2d');
@@ -1178,11 +1188,14 @@ const ScannerView: React.FC<{
       });
       const res = await GeminiService.analyzeFoodImage(b64);
       setScanResult(res);
-      // Trigger the vocal report
       await GeminiService.speakStatusReport(res, user.isGamified);
     } catch (err: any) {
       if (err.message?.includes('PERMISSION_DENIED')) {
-        onKeyPrompt().then(s => { if (s) captureFullAnalysis(); });
+        onKeyPrompt().then(s => { 
+          if (s) {
+            captureFullAnalysis(); 
+          }
+        });
       } else {
         onError(user.isGamified ? "Magic scan failed!" : "Deep molecular analysis failed.");
       }
@@ -1203,11 +1216,7 @@ const ScannerView: React.FC<{
             <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
             <canvas ref={canvasRef} className="hidden" />
             <div className={`scan-line ${mouldAlert ? 'bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.8)]' : ''}`}></div>
-            
-            {mouldAlert && (
-              <div className="absolute inset-0 pointer-events-none border-[12px] border-red-500/40 animate-pulse z-20"></div>
-            )}
-
+            {mouldAlert && <div className="absolute inset-0 pointer-events-none border-[12px] border-red-500/40 animate-pulse z-20"></div>}
             {objectName && (
               <div className={`absolute top-10 left-1/2 -translate-x-1/2 ${user.isGamified ? 'bg-violet-600' : 'bg-emerald-600'} px-6 py-2 rounded-full text-white font-bold text-xs shadow-2xl animate-bounce z-30`}>
                 {mouldAlert ? '⚠️ BIOHAZARD DETECTED' : objectName}
@@ -1226,15 +1235,7 @@ const ScannerView: React.FC<{
       <p className="text-xs text-slate-400 font-bold uppercase text-center tracking-widest italic animate-pulse">
         {mouldAlert ? 'WARNING: Spoilage patterns detected!' : (user.isGamified ? 'Searching for loot items...' : 'Scanning for biological assets...')}
       </p>
-      
-      {scanResult && (
-        <ResultVerificationModal 
-          user={user}
-          scanResult={scanResult} 
-          onAdd={onAdd} 
-          onClose={() => setScanResult(null)} 
-        />
-      )}
+      {scanResult && <ResultVerificationModal user={user} scanResult={scanResult} onAdd={onAdd} onClose={() => setScanResult(null)} />}
     </div>
   );
 };

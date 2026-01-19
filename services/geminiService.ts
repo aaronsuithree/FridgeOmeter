@@ -110,7 +110,8 @@ export const analyzeFoodImage = async (base64Image: string): Promise<ScanResult>
         }
       }
     });
-    return JSON.parse(cleanJson(response.text || '{}')) as ScanResult;
+    const text = response.text ?? '{}';
+    return JSON.parse(cleanJson(text)) as ScanResult;
   } catch (error: any) { 
     console.error("Neural Scanner Failure:", error);
     throw error; 
@@ -122,7 +123,6 @@ export const analyzeFoodImage = async (base64Image: string): Promise<ScanResult>
  */
 export const speakStatusReport = async (result: ScanResult, isGamified: boolean): Promise<void> => {
   const freshAi = getAi();
-  const tone = isGamified ? "cheerful magic fairy" : "precise futuristic computer";
   const prompt = isGamified 
     ? `Tell the hero that we found ${result.name}! ${result.mouldDetected ? "Oh no! My magic sees icky mould on this. Please don't eat it!" : "It looks super fresh and magical. Safe to add to the loot chest!"}`
     : `Status report for ${result.name}. Mould detection: ${result.mouldDetected ? "POSITIVE. Surface decay detected. Disposal recommended." : "NEGATIVE. Molecular structure appears intact. Safe for consumption."}`;
@@ -210,7 +210,8 @@ export const generateRecipes = async (items: FoodItem[]): Promise<Recipe[]> => {
         }
       }
     });
-    return JSON.parse(cleanJson(response.text || '[]')) as Recipe[];
+    const text = response.text ?? '[]';
+    return JSON.parse(cleanJson(text)) as Recipe[];
   } catch (error: any) {
     return [];
   }
@@ -248,6 +249,7 @@ export const generateMealPlan = async (items: FoodItem[]): Promise<MealSuggestio
         }
       }
     });
-    return JSON.parse(cleanJson(response.text || '[]')) as MealSuggestion[];
+    const text = response.text ?? '[]';
+    return JSON.parse(cleanJson(text)) as MealSuggestion[];
   } catch (e) { return []; }
 };
