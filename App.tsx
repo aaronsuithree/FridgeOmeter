@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, LiveServerMessage, Modality, Chat, GenerateContentResponse } from '@google/genai';
 import { 
@@ -498,7 +499,7 @@ const InventoryView: React.FC<{
       // Trigger vocal report immediately
       await GeminiService.speakStatusReport(res, user.isGamified);
     } catch (e: any) {
-      if (e.message?.includes('PERMISSION_DENIED')) {
+      if (e.message?.includes('PERMISSION_DENIED') || e.message?.includes('Requested entity was not found')) {
         onKeyPrompt().then(s => { 
           if (s) {
             handleFileUpload(base64); 
@@ -1156,7 +1157,7 @@ const ScannerView: React.FC<{
       });
       sessionRef.current = await sessionPromise;
     } catch (e: any) { 
-      if (e.message?.includes('PERMISSION_DENIED')) {
+      if (e.message?.includes('PERMISSION_DENIED') || e.message?.includes('Requested entity was not found')) {
         onKeyPrompt().then(s => { 
           if (s) {
             startScanner(); 
@@ -1190,7 +1191,7 @@ const ScannerView: React.FC<{
       setScanResult(res);
       await GeminiService.speakStatusReport(res, user.isGamified);
     } catch (err: any) {
-      if (err.message?.includes('PERMISSION_DENIED')) {
+      if (err.message?.includes('PERMISSION_DENIED') || err.message?.includes('Requested entity was not found')) {
         onKeyPrompt().then(s => { 
           if (s) {
             captureFullAnalysis(); 

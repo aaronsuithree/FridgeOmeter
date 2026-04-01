@@ -1,7 +1,8 @@
+
 import { GoogleGenAI, Type, Chat, GenerateContentResponse, Modality } from "@google/genai";
 import { ScanResult, Category, StorageLocation, FoodItem, SearchResponse, PlaceResult, MealSuggestion, Recipe } from "../types";
 
-const getAi = () => new GoogleGenAI({ apiKey: process.env.API_KEY || 'FAKE_API_KEY_FOR_DEVELOPMENT' });
+const getAi = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const fastModelId = "gemini-3-flash-preview";
 const complexModelId = "gemini-3-pro-preview";
@@ -74,14 +75,29 @@ export const analyzeFoodImage = async (base64Image: string): Promise<ScanResult>
   const prompt = `Act as the Fridgeometer Ultra-Precision Molecular Scanner. Your primary priority is food safety and mould detection.
 
   IMAGE ANALYSIS TASKS:
-  1. **MOULD DETECTION**: Examine the surface textures with extreme scrutiny. Look for fuzz, discolored spores (green, white, black, blue), mycelium threads, or unusual textural slime. Cross-reference with known spoilage patterns for this item using 'googleSearch'.
-  2. **BRAND & VARIETY**: Identify the exact brand and variety of the item.
+  1. **MOULD DETECTION**: Examine the surface textures with extreme scrutiny. Look for fuzz, discolored spores, mycelium, or slime. Use 'googleSearch' to verify symptoms.
+  2. **BRAND & VARIETY**: Identify the exact brand and variety.
   3. **PRICE LOGGING**: Find the current US market average unit price via 'googleSearch'.
   4. **NUTRITION**: Estimate calories per serving.
-  5. **LOGISTICS**: Determine category and storage location.
-  6. **EXPIRY**: Predict the safety window (YYYY-MM-DD).
+  5. **LOGISTICS**: Determine category (Produce, Dairy, Meat, Beverage, Grains, Canned, Snacks, Other) and storage location (Fridge, Freezer, Pantry).
+  6. **EXPIRY**: Predict safety window (YYYY-MM-DD).
 
-  Be strictly objective. If there is even a 5% chance of mould, mark 'mouldDetected' as true.`;
+  OUTPUT FORMAT: Return a RAW JSON object with these fields:
+  {
+    "name": string,
+    "expiryDate": string (YYYY-MM-DD),
+    "category": string,
+    "storageLocation": string,
+    "quantity": number,
+    "unit": string,
+    "confidence": number (0-1),
+    "brandInfo": string,
+    "mouldDetected": boolean,
+    "calories": integer,
+    "estimatedPrice": number
+  }
+  
+  Be strictly objective. If there is a risk of mould, mark 'mouldDetected' as true.`;
 
   try {
     const response = await freshAi.models.generateContent({
@@ -89,29 +105,14 @@ export const analyzeFoodImage = async (base64Image: string): Promise<ScanResult>
       contents: { parts: [{ inlineData: { mimeType: "image/jpeg", data: base64Image } }, { text: prompt }] },
       config: {
         tools: [{ googleSearch: {} }],
-        thinkingConfig: { thinkingBudget: 32000 }, // Max thinking for maximum accuracy
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            name: { type: Type.STRING },
-            expiryDate: { type: Type.STRING },
-            category: { type: Type.STRING, enum: ['Produce', 'Dairy', 'Meat', 'Beverage', 'Grains', 'Canned', 'Snacks', 'Other'] },
-            storageLocation: { type: Type.STRING, enum: ['Fridge', 'Freezer', 'Pantry'] },
-            quantity: { type: Type.NUMBER },
-            unit: { type: Type.STRING },
-            confidence: { type: Type.NUMBER },
-            brandInfo: { type: Type.STRING },
-            mouldDetected: { type: Type.BOOLEAN },
-            calories: { type: Type.INTEGER },
-            estimatedPrice: { type: Type.NUMBER }
-          },
-          required: ["name", "category", "storageLocation", "quantity", "unit", "confidence", "mouldDetected", "calories", "expiryDate", "estimatedPrice"]
-        }
+        thinkingConfig: { thinkingBudget: 32000 }
       }
     });
+    
+    // Extract JSON from text manually since nano banana models don't support responseSchema/responseMimeType
     const text = response.text ?? '{}';
-    return JSON.parse(cleanJson(text)) as ScanResult;
+    const jsonStr = cleanJson(text);
+    return JSON.parse(jsonStr) as ScanResult;
   } catch (error: any) { 
     console.error("Neural Scanner Failure:", error);
     throw error; 
