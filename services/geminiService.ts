@@ -4,10 +4,10 @@ import { ScanResult, Category, StorageLocation, FoodItem, SearchResponse, PlaceR
 
 const getAi = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-const fastModelId = "gemini-3-flash-preview";
-const complexModelId = "gemini-3-pro-preview";
+const fastModelId = "gemini-3.1-flash-preview";
+const complexModelId = "gemini-3.1-pro-preview";
 const mapsModelId = "gemini-2.5-flash";
-const visionProModelId = "gemini-3-pro-image-preview";
+const visionProModelId = "gemini-3.1-pro-image-preview";
 const ttsModelId = "gemini-2.5-flash-preview-tts";
 
 const cleanJson = (text: string): string => {
