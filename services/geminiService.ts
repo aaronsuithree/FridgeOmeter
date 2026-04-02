@@ -6,8 +6,8 @@ const getAi = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const fastModelId = "gemini-3-flash-preview";
 const complexModelId = "gemini-3.1-pro-preview";
-const mapsModelId = "gemini-3-flash";
-const visionProModelId = "gemini-3.1-pro-image-preview";
+const mapsModelId = "gemini-3-flash-preview";
+const visionProModelId = "gemini-3.1-pro-preview";
 const ttsModelId = "gemini-2.5-flash-preview-tts";
 
 const cleanJson = (text: string): string => {
